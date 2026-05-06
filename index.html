@@ -1,93 +1,231 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TCG Pocket Tracker</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokémon TCG Pocket - Tracker</title>
+    <style>
+        :root { --primary: #e3350d; --bg-color: #f4f4f9; --card-bg: #fff; --text-dark: #333; --border-radius: 8px; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg-color); color: var(--text-dark); margin: 0; display: flex; flex-direction: column; align-items: center; }
+        header { background-color: var(--primary); color: white; width: 100%; text-align: center; padding: 1rem 0; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; flex-direction: column; align-items: center; }
+        .auth-bar { background: #b32a0a; width: 100%; padding: 0.5rem; text-align: right; box-sizing: border-box; display: flex; justify-content: flex-end; align-items: center; gap: 10px; color: white; }
+        .auth-bar button { padding: 5px 15px; cursor: pointer; border: none; border-radius: 4px; font-weight: bold; background: white; color: var(--primary); }
+        main { max-width: 800px; width: 90%; margin: 2rem auto; background: var(--card-bg); padding: 2rem; border-radius: var(--border-radius); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .collection-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid #eee; }
+        select { padding: 0.5rem; font-size: 1rem; border-radius: 4px; }
+        .pack-image-container { max-width: 250px; }
+        .pack-image-container img { width: 100%; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .recommendation-box { background-color: #e8f4f8; border-left: 5px solid #3498db; padding: 1rem; margin-bottom: 2rem; border-radius: 4px; }
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; }
+        .card-item { background: #fdfdfd; border: 1px solid #e0e0e0; padding: 1rem; border-radius: var(--border-radius); cursor: pointer; }
+        .card-item.missing { background-color: #ffe6e6; border-color: var(--primary); }
+    </style>
 </head>
 <body>
 
-<!-- ══ LOGIN SCREEN ══ -->
-<div id="loginScreen" class="login-screen">
-  <div class="login-card">
-    <div class="login-logo">⚡</div>
-    <h1 class="login-title">TCG Pocket <span>Tracker</span></h1>
-    <p class="login-sub">Lleva el control de tu colección y sabe qué sobres abrir.</p>
-    <button class="google-btn" id="loginBtn">
-      <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-      Continuar con Google
-    </button>
-    <p class="login-note">Tu colección se guarda en la nube vinculada a tu cuenta.</p>
-  </div>
-</div>
+    <div class="auth-bar">
+        <span id="user-info" style="display: none;">Conectado como: <b id="user-name"></b></span>
+        <button id="login-btn">Iniciar sesión con Google</button>
+        <button id="logout-btn" style="display: none;">Cerrar sesión</button>
+    </div>
 
-<!-- ══ APP ══ -->
-<div id="app" class="app hidden">
+    <header>
+        <h1>Pocket Pack Tracker</h1>
+        <p>Tu colección guardada en la nube</p>
+    </header>
 
-  <!-- TOP BAR -->
-  <header class="topbar">
-    <div class="logo" onclick="showDash()">TCG<span>·</span>POCKET</div>
-    <div class="sep"></div>
-    <button class="tab active" id="t-dash" onclick="showDash()">Inicio</button>
-    <button class="tab" id="t-col" onclick="showColView()">Colección</button>
-    <div class="flex1"></div>
-    <div class="gpills" id="gpills"></div>
-    <div class="user-area" id="userArea"></div>
-  </header>
-
-  <div class="body">
-
-    <!-- SIDEBAR -->
-    <aside class="sidebar" id="sidebar">
-      <div class="sb-section">Serie A</div>
-      <div id="sb-A"></div>
-      <div class="sb-section">Serie B</div>
-      <div id="sb-B"></div>
-    </aside>
-
-    <!-- CONTENT -->
-    <main class="content" id="content">
-
-      <!-- DASHBOARD -->
-      <div id="view-dash" class="view">
-        <div class="dash-head">
-          <h1>¿Qué sobres abrir <em>hoy</em>?</h1>
-          <p>Las expansiones están ordenadas por prioridad según las cartas que te faltan.</p>
+    <main>
+        <div class="collection-header">
+            <div>
+                <label for="collection-select"><strong>Colección:</strong></label><br><br>
+                <select id="collection-select"></select>
+                <p id="cloud-status" style="color: #666; font-size: 0.9em; margin-top: 15px;">Inicia sesión para guardar en la nube.</p>
+            </div>
+            <div class="pack-image-container">
+                <img id="pack-image" src="" alt="Sobres de la expansión">
+            </div>
         </div>
-        <div id="expList" class="exp-list">
-          <div class="loader">Cargando expansiones…</div>
-        </div>
-      </div>
 
-      <!-- COLLECTION -->
-      <div id="view-col" class="view hidden">
-        <div class="col-toolbar">
-          <div class="col-head">
-            <span class="col-code" id="colCode"></span>
-            <span class="col-name" id="colName"></span>
-          </div>
-          <div class="pack-pills" id="packPills"></div>
-          <div class="flex1"></div>
-          <input class="search-box" id="searchBox" placeholder="Buscar carta…" oninput="renderCards()">
-          <button class="ghost-btn danger" onclick="confirmReset()">Borrar todo</button>
+        <div class="recommendation-box" id="recommendation-box">
+            <h2 style="margin-top:0; color:#2980b9;">Recomendación</h2>
+            <p id="recommendation-text">Cargando...</p>
         </div>
-        <div class="cards-area">
-          <div id="cardsGrid" class="cards-grid"></div>
-        </div>
-      </div>
 
+        <h3>Lista de Cartas (Marca las que te FALTAN)</h3>
+        <div class="card-grid" id="card-grid"></div>
     </main>
-  </div>
-</div>
 
-<div class="toast" id="toast"></div>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-<!-- Firebase SDKs -->
-<script type="module" src="js/firebase.js"></script>
-<script src="js/data.js"></script>
-<script src="js/app.js"></script>
+        // === ¡Copia tu configuración de Firebase aquí en el Paso 2! ===
+        const firebaseConfig = {
+          apiKey: "AIzaSyDkhlFfl4S2p83v42SPfmKuF7htyjyj1LY",
+          authDomain: "tcgpocket-fd71b.firebaseapp.com",
+          projectId: "tcgpocket-fd71b",
+          storageBucket: "tcgpocket-fd71b.firebasestorage.app",
+          messagingSenderId: "188594442466",
+          appId: "1:188594442466:web:175fd7d0b0bf68c7f2cebb",
+          measurementId: "G-83HDXXFQP1"
+        };
+        // Inicializar Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
+
+        // === Base de datos de expansiones ===
+        const database = {
+            "genetic_apex": {
+                name: "Genetic Apex (A1)",
+                image: "https://via.placeholder.com/300x150/e3350d/ffffff?text=Sobres+Genetic+Apex", 
+                packs: ["Charizard", "Mewtwo", "Pikachu"],
+                cards: [
+                    { id: "ga1", name: "Charizard ex", packs: ["Charizard"] },
+                    { id: "ga2", name: "Mewtwo ex", packs: ["Mewtwo"] },
+                    { id: "ga3", name: "Pikachu ex", packs: ["Pikachu"] }
+                ]
+            },
+            "fantastical_parade": {
+                name: "Fantastical Parade",
+                image: "https://via.placeholder.com/300x150/9b59b6/ffffff?text=Sobres+Fantastical+Parade",
+                packs: ["Gardevoir"],
+                cards: [
+                    { id: "fp1", name: "Gardevoir ex", packs: ["Gardevoir"] },
+                    { id: "fp2", name: "Sylveon", packs: ["Gardevoir"] }
+                ]
+            },
+            "chaos_rising": {
+                name: "Chaos Rising",
+                image: "https://via.placeholder.com/300x150/e67e22/ffffff?text=Sobres+Chaos+Rising",
+                packs: ["Lucario", "Zygarde"],
+                cards: [
+                    { id: "cr1", name: "Mega Lucario ex", packs: ["Lucario"] },
+                    { id: "cr2", name: "Mega Zygarde ex", packs: ["Zygarde"] }
+                ]
+            }
+        };
+
+        // Variables de estado
+        let currentCollection = "genetic_apex";
+        let missingCards = []; 
+        let currentUser = null;
+
+        // Elementos DOM
+        const selectEl = document.getElementById('collection-select');
+        const gridEl = document.getElementById('card-grid');
+        const packImgEl = document.getElementById('pack-image');
+        const statusEl = document.getElementById('cloud-status');
+        const recText = document.getElementById('recommendation-text');
+
+        // Inicializar UI
+        function initUI() {
+            for (const [key, val] of Object.entries(database)) {
+                const opt = document.createElement('option');
+                opt.value = key;
+                opt.textContent = val.name;
+                selectEl.appendChild(opt);
+            }
+            selectEl.addEventListener('change', (e) => {
+                currentCollection = e.target.value;
+                renderCards();
+            });
+            renderCards();
+        }
+
+        // Renderizar Cartas
+        function renderCards() {
+            const collection = database[currentCollection];
+            packImgEl.src = collection.image; // Cambia la imagen del sobre
+            gridEl.innerHTML = '';
+
+            collection.cards.forEach(card => {
+                const isMissing = missingCards.includes(card.id);
+                const div = document.createElement('div');
+                div.className = `card-item ${isMissing ? 'missing' : ''}`;
+                div.innerHTML = `<strong>${card.name}</strong><br><small>${card.packs.join(', ')}</small>`;
+                
+                div.addEventListener('click', () => {
+                    if (isMissing) {
+                        missingCards = missingCards.filter(id => id !== card.id);
+                    } else {
+                        missingCards.push(card.id);
+                    }
+                    renderCards(); // Re-render visual
+                    saveToCloud(); // Guardar en Firebase
+                });
+                gridEl.appendChild(div);
+            });
+            calculateRecommendation();
+        }
+
+        function calculateRecommendation() {
+            const packs = {};
+            const collection = database[currentCollection];
+            
+            missingCards.forEach(cardId => {
+                const card = collection.cards.find(c => c.id === cardId);
+                if(card) card.packs.forEach(p => { packs[p] = (packs[p] || 0) + 1 });
+            });
+
+            const sorted = Object.entries(packs).sort((a,b) => b[1] - a[1]);
+            if(sorted.length === 0) {
+                recText.innerHTML = "¡Tienes todas las cartas o no has marcado ninguna!";
+                return;
+            }
+            recText.innerHTML = `Abre sobres de: <strong>${sorted[0][0]}</strong>. Te faltan ${sorted[0][1]} cartas de ahí.`;
+        }
+
+        // --- LÓGICA DE FIREBASE (NUBE) ---
+        async function loadFromCloud(uid) {
+            statusEl.textContent = "Cargando tu colección...";
+            const docRef = doc(db, "users", uid);
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+                missingCards = docSnap.data().missingCards || [];
+            } else {
+                missingCards = [];
+            }
+            statusEl.textContent = "Colección sincronizada con la nube ☁️";
+            renderCards();
+        }
+
+        async function saveToCloud() {
+            if (!currentUser) return;
+            statusEl.textContent = "Guardando...";
+            await setDoc(doc(db, "users", currentUser.uid), {
+                missingCards: missingCards
+            }, { merge: true });
+            statusEl.textContent = "Guardado automático en la nube ☁️";
+        }
+
+        // Eventos de Login/Logout
+        document.getElementById('login-btn').addEventListener('click', () => signInWithPopup(auth, provider));
+        document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
+
+        // Observador de estado de sesión
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('login-btn').style.display = 'none';
+                document.getElementById('user-info').style.display = 'inline';
+                document.getElementById('logout-btn').style.display = 'inline';
+                document.getElementById('user-name').textContent = user.displayName;
+                loadFromCloud(user.uid);
+            } else {
+                currentUser = null;
+                missingCards = []; // Limpiar pantalla al cerrar sesión
+                document.getElementById('login-btn').style.display = 'inline';
+                document.getElementById('user-info').style.display = 'none';
+                document.getElementById('logout-btn').style.display = 'none';
+                statusEl.textContent = "Inicia sesión para guardar en la nube.";
+                renderCards();
+            }
+        });
+
+        initUI();
+    </script>
 </body>
 </html>
