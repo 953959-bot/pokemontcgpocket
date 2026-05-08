@@ -5,43 +5,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pokémon TCG Pocket - Álbum Visual</title>
     <style>
-        :root { --primary: #e3350d; --bg-color: #1a1a1a; --card-bg: #2d2d2d; --text-light: #f0f0f0; --border-radius: 12px; }
+        :root { --primary: #e3350d; --bg-color: #121212; --card-bg: #1e1e1e; --text-light: #f0f0f0; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg-color); color: var(--text-light); margin: 0; padding-bottom: 50px; }
         
-        /* Cabecera */
-        header { background: var(--primary); padding: 1rem; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); position: sticky; top: 0; z-index: 100; }
+        /* Cabecera y Autenticación */
         .auth-bar { background: #b32a0a; padding: 0.5rem 1rem; display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; }
         .auth-bar button { padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; background: white; color: var(--primary); }
-
-        main { max-width: 1100px; width: 95%; margin: 2rem auto; }
-
-        /* VISTA: SELECTOR DE COLECCIONES */
-        .selector-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
-        .set-card { background: var(--card-bg); border-radius: var(--border-radius); overflow: hidden; cursor: pointer; transition: transform 0.2s, border-color 0.2s; border: 2px solid transparent; position: relative;}
-        .set-card:hover { transform: translateY(-5px); border-color: var(--primary); }
-        .set-image { width: 100%; height: 160px; object-fit: cover; background: #444; }
-        .set-info { padding: 15px; }
-        .set-info h3 { margin: 0 0 10px 0; font-size: 1.2rem; }
-
-        /* VISTA: DETALLE DE CARTAS */
-        .back-btn { background: #444; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; margin-bottom: 20px; font-weight: bold; display: flex; align-items: center; gap: 8px; }
-        .back-btn:hover { background: #555; }
         
-        .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; }
-        .card-item { background: #333; border-radius: 8px; overflow: hidden; cursor: pointer; position: relative; transition: all 0.2s; border: 3px solid transparent; }
-        .card-item img { width: 100%; display: block; filter: grayscale(100%) brightness(40%); transition: all 0.3s; }
+        header { background: var(--primary); text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.5); position: sticky; top: 0; z-index: 100; display: flex; flex-direction: column; }
+        header h1 { margin: 15px 0 5px 0; font-size: 1.5rem; }
+        #global-status { font-size: 0.8rem; opacity: 0.9; margin-bottom: 10px; }
+
+        /* Barra de Navegación de Expansiones (TABS) */
+        .tab-bar { display: flex; overflow-x: auto; background: #00000033; padding: 10px; gap: 10px; scrollbar-width: thin; }
+        .tab-bar::-webkit-scrollbar { height: 6px; }
+        .tab-bar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 3px; }
+        
+        .tab { padding: 8px 16px; background: rgba(255,255,255,0.1); border: 2px solid transparent; border-radius: 20px; color: white; white-space: nowrap; cursor: pointer; font-weight: bold; transition: all 0.2s; }
+        .tab:hover { background: rgba(255,255,255,0.2); }
+        .tab.active { background: white; color: var(--primary); border-color: white; box-shadow: 0 0 10px rgba(255,255,255,0.5); }
+
+        main { max-width: 1200px; width: 95%; margin: 1.5rem auto; }
+
+        /* Información de la expansión activa */
+        .expansion-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #333; }
+        .expansion-header h2 { margin: 0; color: #fff; }
+        .progress-text { font-size: 1.1rem; font-weight: bold; color: #aaa; }
+
+        /* Cuadrícula de Cartas */
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+        .card-item { background: #222; border-radius: 8px; overflow: hidden; cursor: pointer; position: relative; transition: all 0.2s; border: 3px solid transparent; }
+        .card-item img { width: 100%; display: block; filter: grayscale(100%) brightness(35%); transition: all 0.3s; }
         
         /* Estado: CARTA OBTENIDA */
-        .card-item.owned { border-color: #ffcb05; box-shadow: 0 0 15px rgba(255, 203, 5, 0.4); }
+        .card-item.owned { border-color: #ffcb05; box-shadow: 0 0 15px rgba(255, 203, 5, 0.3); }
         .card-item.owned img { filter: grayscale(0%) brightness(100%); }
         
-        .card-number { position: absolute; bottom: 5px; right: 8px; background: rgba(0,0,0,0.7); padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; z-index: 10; }
-
-        /* Barras de progreso */
-        .progress-bg { width: 100%; background: #444; height: 10px; border-radius: 5px; margin-top: 8px; overflow: hidden; }
-        .progress-fill { height: 100%; background: #27ae60; width: 0%; transition: width 0.5s; }
-        
-        .recommendation { background: #2c3e50; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 5px solid #3498db; }
+        .card-number { position: absolute; bottom: 5px; right: 8px; background: rgba(0,0,0,0.85); padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; z-index: 10; border: 1px solid #444; }
 
         /* Loader */
         .loader { border: 5px solid #333; border-top: 5px solid var(--primary); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 50px auto; }
@@ -52,9 +52,7 @@
 <body>
 
     <div class="auth-bar">
-        <div>
-            <span id="user-info" class="hidden">👤 <b id="user-name"></b></span>
-        </div>
+        <div><span id="user-info" class="hidden">👤 <b id="user-name"></b></span></div>
         <div>
             <button id="login-btn">Conectar con Google</button>
             <button id="logout-btn" class="hidden">Cerrar Sesión</button>
@@ -62,31 +60,20 @@
     </div>
 
     <header>
-        <h1>Pokémon TCG Pocket Tracker</h1>
-        <div id="global-status" style="font-size: 0.8rem; opacity: 0.8;">Cargando base de datos mundial...</div>
+        <h1>Mi Álbum TCG Pocket</h1>
+        <div id="global-status">Descargando cartas oficiales...</div>
+        <div class="tab-bar hidden" id="tab-bar"></div>
     </header>
 
     <main>
         <div id="main-loader" class="loader"></div>
 
-        <div id="view-selector" class="hidden">
-            <h2 style="border-bottom: 2px solid #333; padding-bottom: 10px;">Mis Colecciones</h2>
-            <div class="selector-grid" id="selector-grid"></div>
-        </div>
-
-        <div id="view-cards" class="hidden">
-            <button class="back-btn" onclick="showSelector()">⬅ Volver al menú</button>
+        <div id="app-content" class="hidden">
+            <div class="expansion-header">
+                <h2 id="current-expansion-title">Expansión</h2>
+                <div class="progress-text" id="progress-text">0 / 0</div>
+            </div>
             
-            <div class="recommendation" id="rec-box">
-                <strong id="rec-title">Sugerencia:</strong>
-                <p id="rec-text" style="margin: 5px 0 0 0;"></p>
-            </div>
-
-            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 15px;">
-                <h2 id="current-set-name" style="margin:0;"></h2>
-                <span id="set-progress-text">0/0</span>
-            </div>
-
             <div class="card-grid" id="card-grid"></div>
         </div>
     </main>
@@ -96,7 +83,7 @@
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-        // Configuración de Firebase (Se mantiene igual)
+        // Configuración de Firebase
         const firebaseConfig = {
           apiKey: "AIzaSyDkhlFfl4S2p83v42SPfmKuF7htyjyj1LY",
           authDomain: "tcgpocket-fd71b.firebaseapp.com",
@@ -111,148 +98,147 @@
         const db = getFirestore(app);
         const provider = new GoogleAuthProvider();
 
+        // Diccionario de nombres reales de expansiones
+        const officialExpansionNames = {
+            "A1": "Genetic Apex",
+            "A1a": "Mythical Island",
+            "A2": "Space-Time Smackdown",
+            "A2a": "Triumphant Light",
+            "A3": "Celestial Guardians",
+            "A3a": "Extradimensional Crisis",
+            "A4": "Wisdom of Sea and Sky",
+            "A4a": "Secluded Springs",
+            "A5": "Crimson Blaze",
+            "A6": "Mega Shine",
+            "P-A": "Promo-A"
+        };
+
         let database = {}; 
         let ownedCards = []; 
         let currentUser = null;
+        let activeExpansionId = null;
 
-        // --- CARGA DE DATOS E IMÁGENES ---
+        // --- CARGA DE LA API ---
         async function loadApp() {
             try {
+                // Descargamos las cartas mundiales desde el repositorio de la comunidad
                 const response = await fetch("https://raw.githubusercontent.com/chase-manning/pokemon-tcg-pocket-cards/refs/heads/main/v4.json");
                 const cards = await response.json();
 
-                // Organizar cartas por Set
+                // Agrupar por expansión
                 cards.forEach(card => {
                     const setKey = card.expansion || card.set || "Otros";
+                    const realName = officialExpansionNames[setKey] || setKey; // Traduce "A1" a "Genetic Apex"
+
                     if (!database[setKey]) {
                         database[setKey] = {
-                            name: setKey.toUpperCase(),
-                            cards: [],
-                            packs: new Set()
+                            id: setKey,
+                            name: realName,
+                            cards: []
                         };
                     }
-                    // Limpiar y añadir datos
+                    
                     database[setKey].cards.push({
                         id: card.id,
                         name: card.name,
                         number: card.number,
-                        image: card.image, // La API ya trae la URL de la imagen
-                        pack: card.pack || "General"
+                        image: card.image
                     });
-                    if(card.pack) database[setKey].packs.add(card.pack);
+                });
+
+                // Ordenar cartas dentro de cada expansión por su número
+                Object.values(database).forEach(exp => {
+                    exp.cards.sort((a, b) => {
+                        const numA = parseInt(a.number.replace(/\D/g, '')) || 0;
+                        const numB = parseInt(b.number.replace(/\D/g, '')) || 0;
+                        return numA - numB;
+                    });
                 });
 
                 document.getElementById('main-loader').classList.add('hidden');
-                document.getElementById('global-status').textContent = "Base de datos sincronizada ✅";
-                showSelector();
+                document.getElementById('app-content').classList.remove('hidden');
+                document.getElementById('tab-bar').classList.remove('hidden');
+                document.getElementById('global-status').textContent = "Base de datos actualizada ✅";
+                
+                // Activar la primera expansión por defecto
+                activeExpansionId = Object.keys(database)[0];
+                renderTabs();
+                renderCards();
+
             } catch (e) {
                 console.error(e);
-                document.getElementById('global-status').textContent = "Error al conectar con la API ❌";
+                document.getElementById('global-status').textContent = "Error al descargar las cartas. Revisa tu conexión.";
             }
         }
 
-        // --- NAVEGACIÓN ---
-        window.showSelector = function() {
-            document.getElementById('view-cards').classList.add('hidden');
-            document.getElementById('view-selector').classList.remove('hidden');
-            renderSelector();
-        };
+        // --- RENDERIZADO DE PESTAÑAS (TABS) ---
+        function renderTabs() {
+            const tabBar = document.getElementById('tab-bar');
+            tabBar.innerHTML = '';
 
-        function showCards(setKey) {
-            document.getElementById('view-selector').classList.add('hidden');
-            document.getElementById('view-cards').classList.remove('hidden');
-            renderCards(setKey);
-        }
-
-        // --- RENDERIZADO ---
-        function renderSelector() {
-            const grid = document.getElementById('selector-grid');
-            grid.innerHTML = '';
-
-            Object.entries(database).forEach(([key, set]) => {
-                const total = set.cards.length;
-                const owned = set.cards.filter(c => ownedCards.includes(c.id)).length;
-                const percent = Math.round((owned / total) * 100);
-
-                const div = document.createElement('div');
-                div.className = 'set-card';
-                div.innerHTML = `
-                    <img class="set-image" src="${set.cards[0].image}" alt="${set.name}">
-                    <div class="set-info">
-                        <h3>${set.name}</h3>
-                        <div style="font-size: 0.8rem; color: #aaa;">Coleccionadas: ${owned} / ${total}</div>
-                        <div class="progress-bg">
-                            <div class="progress-fill" style="width: ${percent}%"></div>
-                        </div>
-                    </div>
-                `;
-                div.onclick = () => showCards(key);
-                grid.appendChild(div);
+            Object.values(database).forEach(exp => {
+                const btn = document.createElement('div');
+                btn.className = `tab ${exp.id === activeExpansionId ? 'active' : ''}`;
+                btn.textContent = exp.name;
+                
+                btn.onclick = () => {
+                    activeExpansionId = exp.id;
+                    renderTabs(); // Actualiza el color de la pestaña seleccionada
+                    renderCards(); // Carga las cartas de esa pestaña
+                };
+                
+                tabBar.appendChild(btn);
             });
         }
 
-        function renderCards(setKey) {
-            const set = database[setKey];
-            document.getElementById('current-set-name').textContent = set.name;
+        // --- RENDERIZADO DE CARTAS ---
+        function renderCards() {
+            if (!activeExpansionId) return;
+
+            const expansion = database[activeExpansionId];
+            document.getElementById('current-expansion-title').textContent = expansion.name;
+            
             const grid = document.getElementById('card-grid');
             grid.innerHTML = '';
 
-            set.cards.forEach(card => {
+            let ownedInThisExpansion = 0;
+
+            expansion.cards.forEach(card => {
                 const isOwned = ownedCards.includes(card.id);
+                if (isOwned) ownedInThisExpansion++;
+
                 const div = document.createElement('div');
                 div.className = `card-item ${isOwned ? 'owned' : ''}`;
                 div.innerHTML = `
-                    <img src="${card.image}" loading="lazy">
-                    <div class="card-number">#${card.number}</div>
+                    <img src="${card.image}" loading="lazy" alt="${card.name}">
+                    <div class="card-number">${card.number}</div>
                 `;
-                div.onclick = () => toggleCard(card.id, setKey);
+                
+                // Evento para marcar/desmarcar
+                div.onclick = () => {
+                    if (ownedCards.includes(card.id)) {
+                        ownedCards = ownedCards.filter(id => id !== card.id);
+                    } else {
+                        ownedCards.push(card.id);
+                    }
+                    renderCards(); // Refresca la vista
+                    saveToCloud(); // Guarda el progreso
+                };
+                
                 grid.appendChild(div);
             });
 
-            updateStats(setKey);
+            // Actualizar contador
+            document.getElementById('progress-text').textContent = `${ownedInThisExpansion} / ${expansion.cards.length}`;
         }
 
-        function toggleCard(cardId, setKey) {
-            if (ownedCards.includes(cardId)) {
-                ownedCards = ownedCards.filter(id => id !== cardId);
-            } else {
-                ownedCards.push(cardId);
-            }
-            renderCards(setKey);
-            saveToCloud();
-        }
-
-        function updateStats(setKey) {
-            const set = database[setKey];
-            const total = set.cards.length;
-            const owned = set.cards.filter(c => ownedCards.includes(c.id)).length;
-            document.getElementById('set-progress-text').textContent = `${owned} / ${total}`;
-
-            // Lógica de recomendación
-            const packNeeds = {};
-            set.cards.forEach(c => {
-                if(!ownedCards.includes(c.id) && c.pack !== "General") {
-                    packNeeds[c.pack] = (packNeeds[c.pack] || 0) + 1;
-                }
-            });
-
-            const sorted = Object.entries(packNeeds).sort((a,b) => b[1] - a[1]);
-            const recText = document.getElementById('rec-text');
-            
-            if(sorted.length > 0) {
-                recText.innerHTML = `Abre sobres de <strong>${sorted[0][0]}</strong>. Te faltan ${sorted[0][1]} cartas únicas ahí.`;
-            } else {
-                recText.textContent = owned === total ? "¡Colección completada! 🎉" : "Sigue abriendo cualquier sobre de esta expansión.";
-            }
-        }
-
-        // --- FIREBASE SYNC ---
+        // --- LÓGICA DE FIREBASE (GUARDADO EN LA NUBE) ---
         async function loadFromCloud(uid) {
             const docSnap = await getDoc(doc(db, "users", uid));
             if (docSnap.exists()) {
                 ownedCards = docSnap.data().ownedCards || [];
             }
-            renderSelector();
+            if(Object.keys(database).length > 0) renderCards();
         }
 
         async function saveToCloud() {
@@ -260,7 +246,7 @@
             await setDoc(doc(db, "users", currentUser.uid), { ownedCards }, { merge: true });
         }
 
-        // --- AUTH ---
+        // --- GESTIÓN DE SESIÓN ---
         document.getElementById('login-btn').onclick = () => signInWithPopup(auth, provider);
         document.getElementById('logout-btn').onclick = () => signOut(auth);
 
@@ -278,10 +264,11 @@
                 document.getElementById('login-btn').classList.remove('hidden');
                 document.getElementById('logout-btn').classList.add('hidden');
                 document.getElementById('user-info').classList.add('hidden');
-                renderSelector();
+                if(Object.keys(database).length > 0) renderCards();
             }
         });
 
+        // Arrancar la aplicación
         loadApp();
     </script>
 </body>
