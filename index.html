@@ -15,10 +15,20 @@
         select { padding: 0.5rem; font-size: 1rem; border-radius: 4px; }
         .pack-image-container { max-width: 250px; }
         .pack-image-container img { width: 100%; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        
+        /* Barra de progreso */
+        .progress-container { margin-top: 1rem; background: white; padding: 1rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #eee;}
+        .progress-bar-bg { width: 100%; background-color: #e0e0e0; border-radius: 10px; height: 20px; overflow: hidden; margin-top: 5px; }
+        .progress-bar-fill { height: 100%; background-color: #27ae60; width: 0%; transition: width 0.4s ease; }
+        .progress-text { font-weight: bold; color: var(--text-dark); }
+
         .recommendation-box { background-color: #e8f4f8; border-left: 5px solid #3498db; padding: 1rem; margin-bottom: 2rem; border-radius: 4px; }
-        .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; }
-        .card-item { background: #fdfdfd; border: 1px solid #e0e0e0; padding: 1rem; border-radius: var(--border-radius); cursor: pointer; }
-        .card-item.missing { background-color: #ffe6e6; border-color: var(--primary); }
+        
+        /* Cuadrícula de cartas */
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;}
+        .card-item { background: #f5f5f5; border: 2px dashed #ccc; padding: 1rem; border-radius: var(--border-radius); cursor: pointer; opacity: 0.6; transition: all 0.2s; text-align: center; }
+        /* Estilo para las cartas que YA TIENES */
+        .card-item.owned { opacity: 1; border: 2px solid var(--primary); background-color: #fff0ed; box-shadow: 0 4px 8px rgba(227, 53, 13, 0.15); }
     </style>
 </head>
 <body>
@@ -46,12 +56,19 @@
             </div>
         </div>
 
-        <div class="recommendation-box" id="recommendation-box">
-            <h2 style="margin-top:0; color:#2980b9;">Recomendación</h2>
+        <div class="progress-container">
+            <div class="progress-text" id="progress-text">Completado: 0/0 (0%)</div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="progress-bar-fill"></div>
+            </div>
+        </div>
+
+        <div class="recommendation-box" id="recommendation-box" style="margin-top: 1.5rem;">
+            <h2 style="margin-top:0; color:#2980b9;">¿Qué sobre abrir?</h2>
             <p id="recommendation-text">Cargando...</p>
         </div>
 
-        <h3>Lista de Cartas (Marca las que te FALTAN)</h3>
+        <h3>Tu Álbum (Marca las cartas que TIENES)</h3>
         <div class="card-grid" id="card-grid"></div>
     </main>
 
@@ -60,7 +77,7 @@
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-        // === ¡Copia tu configuración de Firebase aquí en el Paso 2! ===
+        // Configuración de Firebase
         const firebaseConfig = {
           apiKey: "AIzaSyDkhlFfl4S2p83v42SPfmKuF7htyjyj1LY",
           authDomain: "tcgpocket-fd71b.firebaseapp.com",
@@ -70,6 +87,7 @@
           appId: "1:188594442466:web:175fd7d0b0bf68c7f2cebb",
           measurementId: "G-83HDXXFQP1"
         };
+        
         // Inicializar Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -78,39 +96,33 @@
 
         // === Base de datos de expansiones ===
         const database = {
-            "genetic_apex": {
+            "A1": {
                 name: "Genetic Apex (A1)",
                 image: "https://via.placeholder.com/300x150/e3350d/ffffff?text=Sobres+Genetic+Apex", 
                 packs: ["Charizard", "Mewtwo", "Pikachu"],
                 cards: [
-                    { id: "ga1", name: "Charizard ex", packs: ["Charizard"] },
-                    { id: "ga2", name: "Mewtwo ex", packs: ["Mewtwo"] },
-                    { id: "ga3", name: "Pikachu ex", packs: ["Pikachu"] }
+                    { id: "A1-001", name: "Bulbasaur", packs: ["Pikachu"] },
+                    { id: "A1-004", name: "Venusaur ex", packs: ["Pikachu"] },
+                    { id: "A1-034", name: "Charmander", packs: ["Charizard"] },
+                    { id: "A1-036", name: "Charizard ex", packs: ["Charizard"] },
+                    { id: "A1-129", name: "Mewtwo ex", packs: ["Mewtwo"] },
+                    { id: "A1-219", name: "Investigación de Profesores", packs: ["Charizard", "Mewtwo", "Pikachu"] }
                 ]
             },
-            "fantastical_parade": {
-                name: "Fantastical Parade",
-                image: "https://via.placeholder.com/300x150/9b59b6/ffffff?text=Sobres+Fantastical+Parade",
-                packs: ["Gardevoir"],
+            "A1a": {
+                name: "Mythical Island (A1a)",
+                image: "https://via.placeholder.com/300x150/9b59b6/ffffff?text=Sobres+Mythical+Island",
+                packs: ["Mew"],
                 cards: [
-                    { id: "fp1", name: "Gardevoir ex", packs: ["Gardevoir"] },
-                    { id: "fp2", name: "Sylveon", packs: ["Gardevoir"] }
-                ]
-            },
-            "chaos_rising": {
-                name: "Chaos Rising",
-                image: "https://via.placeholder.com/300x150/e67e22/ffffff?text=Sobres+Chaos+Rising",
-                packs: ["Lucario", "Zygarde"],
-                cards: [
-                    { id: "cr1", name: "Mega Lucario ex", packs: ["Lucario"] },
-                    { id: "cr2", name: "Mega Zygarde ex", packs: ["Zygarde"] }
+                    { id: "A1a-001", name: "Mew ex", packs: ["Mew"] },
+                    { id: "A1a-002", name: "Celebi ex", packs: ["Mew"] }
                 ]
             }
         };
 
         // Variables de estado
-        let currentCollection = "genetic_apex";
-        let missingCards = []; 
+        let currentCollection = "A1";
+        let ownedCards = []; // Ahora guardamos las que TENEMOS
         let currentUser = null;
 
         // Elementos DOM
@@ -138,20 +150,20 @@
         // Renderizar Cartas
         function renderCards() {
             const collection = database[currentCollection];
-            packImgEl.src = collection.image; // Cambia la imagen del sobre
+            packImgEl.src = collection.image; 
             gridEl.innerHTML = '';
 
             collection.cards.forEach(card => {
-                const isMissing = missingCards.includes(card.id);
+                const isOwned = ownedCards.includes(card.id);
                 const div = document.createElement('div');
-                div.className = `card-item ${isMissing ? 'missing' : ''}`;
+                div.className = `card-item ${isOwned ? 'owned' : ''}`;
                 div.innerHTML = `<strong>${card.name}</strong><br><small>${card.packs.join(', ')}</small>`;
                 
                 div.addEventListener('click', () => {
-                    if (isMissing) {
-                        missingCards = missingCards.filter(id => id !== card.id);
+                    if (isOwned) {
+                        ownedCards = ownedCards.filter(id => id !== card.id);
                     } else {
-                        missingCards.push(card.id);
+                        ownedCards.push(card.id);
                     }
                     renderCards(); // Re-render visual
                     saveToCloud(); // Guardar en Firebase
@@ -161,21 +173,35 @@
             calculateRecommendation();
         }
 
+        // Calcular Recomendación y Progreso
         function calculateRecommendation() {
             const packs = {};
             const collection = database[currentCollection];
+            let ownedInThisCollection = 0;
+            const totalInThisCollection = collection.cards.length;
             
-            missingCards.forEach(cardId => {
-                const card = collection.cards.find(c => c.id === cardId);
-                if(card) card.packs.forEach(p => { packs[p] = (packs[p] || 0) + 1 });
+            collection.cards.forEach(card => {
+                if (!ownedCards.includes(card.id)) {
+                    // Si NO la tenemos, sumamos 1 a la necesidad de abrir ese sobre
+                    card.packs.forEach(p => { packs[p] = (packs[p] || 0) + 1 });
+                } else {
+                    // Si la tenemos, aumentamos el contador de progreso
+                    ownedInThisCollection++;
+                }
             });
 
+            // Actualizar barra de progreso
+            const percentage = totalInThisCollection === 0 ? 0 : Math.round((ownedInThisCollection / totalInThisCollection) * 100);
+            document.getElementById('progress-text').innerText = `Completado: ${ownedInThisCollection} / ${totalInThisCollection} (${percentage}%)`;
+            document.getElementById('progress-bar-fill').style.width = `${percentage}%`;
+
+            // Actualizar texto de recomendación
             const sorted = Object.entries(packs).sort((a,b) => b[1] - a[1]);
             if(sorted.length === 0) {
-                recText.innerHTML = "¡Tienes todas las cartas o no has marcado ninguna!";
+                recText.innerHTML = "🎉 ¡Felicidades! Tienes todas las cartas de esta colección.";
                 return;
             }
-            recText.innerHTML = `Abre sobres de: <strong>${sorted[0][0]}</strong>. Te faltan ${sorted[0][1]} cartas de ahí.`;
+            recText.innerHTML = `Para completar esta colección más rápido, debes abrir sobres de: <strong>${sorted[0][0]}</strong>.<br><small>Te faltan ${sorted[0][1]} cartas que salen en este sobre.</small>`;
         }
 
         // --- LÓGICA DE FIREBASE (NUBE) ---
@@ -184,9 +210,10 @@
             const docRef = doc(db, "users", uid);
             const docSnap = await getDoc(docRef);
             if (docSnap.exists()) {
-                missingCards = docSnap.data().missingCards || [];
+                // Leemos las cartas obtenidas, si es una cuenta antigua con missingCards, las ignorará
+                ownedCards = docSnap.data().ownedCards || [];
             } else {
-                missingCards = [];
+                ownedCards = [];
             }
             statusEl.textContent = "Colección sincronizada con la nube ☁️";
             renderCards();
@@ -196,7 +223,7 @@
             if (!currentUser) return;
             statusEl.textContent = "Guardando...";
             await setDoc(doc(db, "users", currentUser.uid), {
-                missingCards: missingCards
+                ownedCards: ownedCards
             }, { merge: true });
             statusEl.textContent = "Guardado automático en la nube ☁️";
         }
@@ -216,7 +243,7 @@
                 loadFromCloud(user.uid);
             } else {
                 currentUser = null;
-                missingCards = []; // Limpiar pantalla al cerrar sesión
+                ownedCards = []; // Limpiar pantalla al cerrar sesión
                 document.getElementById('login-btn').style.display = 'inline';
                 document.getElementById('user-info').style.display = 'none';
                 document.getElementById('logout-btn').style.display = 'none';
@@ -228,4 +255,4 @@
         initUI();
     </script>
 </body>
-</html>
+</html>ml>
